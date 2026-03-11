@@ -12,11 +12,20 @@
 #include "oatpp/core/async/Executor.hpp"
 #include "oatpp/core/macro/component.hpp"
 
+#include "utils/Config.hpp"
+
 /**
  * Test Components config
  */
 class TestComponent {
 public:
+
+  /**
+   * Create Config component - required by DatabaseComponent, controllers, and UserAuth
+   */
+  OATPP_CREATE_COMPONENT(std::shared_ptr<Config>, config)([] {
+    return std::make_shared<Config>("./config.json");
+  }());
 
   /**
    * Create oatpp virtual network interface for test networking
