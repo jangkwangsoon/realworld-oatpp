@@ -7,6 +7,9 @@
 
 class TestDatabaseComponent {
 public:
+  ~TestDatabaseComponent() {
+    m_ConnectionPool->stop();
+  }
 
   OATPP_COMPONENT(std::shared_ptr<Config>, config);
 
