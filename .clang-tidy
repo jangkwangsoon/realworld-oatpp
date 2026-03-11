@@ -1,0 +1,33 @@
+---
+# clang-tidy 설정 for realworld-oatpp
+# 경고 보고만 (CI 실패 아님)
+
+Checks: >
+  -*,
+  bugprone-*,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-narrowing-conversions,
+  misc-*,
+  -misc-non-private-member-variables-in-classes,
+  -misc-no-recursion,
+  performance-*,
+  readability-identifier-naming,
+  readability-redundant-*,
+  modernize-use-nullptr,
+  modernize-use-override,
+  modernize-use-using
+
+# C++11 제한 — modernize-use-auto 등 C++14+ 기능 비활성화
+# oatpp 매크로 기반 코드에 불필요한 경고 억제
+
+WarningsAsErrors: ''
+
+HeaderFilterRegex: 'src/.*\.hpp$'
+
+CheckOptions:
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.FunctionCase
+    value: camelBack
+  - key: readability-identifier-naming.VariableCase
+    value: camelBack

@@ -26,7 +26,6 @@
 #define static_files_hpp
 
 #include "oatpp/core/Types.hpp"
-#include "oatpp/core/data/stream/ChunkedBuffer.hpp"
 #include "oatpp/core/data/stream/FileStream.hpp"
 
 #include <unordered_map>

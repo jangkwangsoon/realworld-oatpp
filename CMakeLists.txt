@@ -63,23 +63,22 @@ add_executable(${project_name}
 target_link_libraries(${project_name} ${project_name}-lib)
 add_dependencies(${project_name} ${project_name}-lib)
 
-#add_executable(${project_name}-test
-#        test/tests.cpp
-#        test/app/TestComponent.hpp
-#        test/app/MyApiTestClient.hpp
-#        test/BaseControllerTest.cpp
-#        test/BaseControllerTest.hpp
-#)
-#target_link_libraries(${project_name}-test ${project_name}-lib)
-#add_dependencies(${project_name}-test ${project_name}-lib)
+add_executable(${project_name}-test
+        test/tests.cpp
+        test/UserAuthTest.cpp
+        test/UserControllerTest.cpp
+        test/ArticleControllerTest.cpp
+        test/CommentControllerTest.cpp
+)
+target_link_libraries(${project_name}-test ${project_name}-lib)
+add_dependencies(${project_name}-test ${project_name}-lib)
 
-#set_target_properties(${project_name}-lib ${project_name} ${project_name}-test PROPERTIES
-set_target_properties(${project_name}-lib ${project_name} PROPERTIES
+set_target_properties(${project_name}-lib ${project_name} ${project_name}-test PROPERTIES
         CXX_STANDARD 11
         CXX_EXTENSIONS OFF
         CXX_STANDARD_REQUIRED ON
         LINKER_LANGUAGE CXX
 )
 
-#enable_testing()
-#add_test(project-tests ${project_name}-test)
+enable_testing()
+add_test(project-tests ${project_name}-test)

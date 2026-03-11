@@ -1,0 +1,52 @@
+-- Database schema for realworld-oatpp
+-- Idempotent: safe to run multiple times
+
+DROP TABLE IF EXISTS comments CASCADE;
+DROP TABLE IF EXISTS favorites CASCADE;
+DROP TABLE IF EXISTS follows CASCADE;
+DROP TABLE IF EXISTS articles CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  username TEXT NOT NULL UNIQUE,
+  email TEXT NOT NULL UNIQUE,
+  bio TEXT,
+  image TEXT,
+  hash TEXT NOT NULL
+);
+
+CREATE TABLE articles (
+  id SERIAL PRIMARY KEY,
+  slug TEXT NOT NULL UNIQUE,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  body TEXT NOT NULL,
+  author INTEGER NOT NULL REFERENCES users ON DELETE CASCADE,
+  tag_list TEXT[] NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  favorites_count INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE favorites (
+  "user" INTEGER REFERENCES users ON DELETE CASCADE,
+  article INTEGER REFERENCES articles ON DELETE CASCADE,
+  PRIMARY KEY ("user", article)
+);
+
+CREATE TABLE follows (
+  follower INTEGER REFERENCES users ON DELETE CASCADE,
+  followed INTEGER REFERENCES users ON DELETE CASCADE,
+  CHECK (follower != followed),
+  PRIMARY KEY(follower, followed)
+);
+
+CREATE TABLE comments (
+  id SERIAL PRIMARY KEY,
+  body TEXT NOT NULL,
+  article INTEGER NOT NULL REFERENCES articles ON DELETE CASCADE,
+  author INTEGER NOT NULL REFERENCES users ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);

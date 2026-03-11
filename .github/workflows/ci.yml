@@ -1,0 +1,160 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-22.04
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: realworld
+          POSTGRES_PASSWORD: realworld
+          POSTGRES_DB: realworld
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake git \
+            zlib1g-dev libssl-dev nlohmann-json3-dev libpq-dev \
+            postgresql-client clang-tidy jq curl
+
+      - name: Cache oatpp modules
+        uses: actions/cache@v4
+        id: oatpp-cache
+        with:
+          path: |
+            /usr/local/lib/cmake/oatpp-*
+            /usr/local/lib/oatpp-*
+            /usr/local/include/oatpp-*
+            /usr/local/share/oatpp-*
+          key: oatpp-1.3.0-latest-${{ runner.os }}-v3
+
+      - name: Build and install oatpp modules
+        if: steps.oatpp-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p tmp && cd tmp
+          for module in oatpp oatpp-zlib oatpp-postgresql; do
+            git clone --depth=1 --branch 1.3.0-latest https://github.com/oatpp/$module
+            cd $module && mkdir build && cd build
+            cmake .. && make -j$(nproc) && sudo make install
+            cd ../..
+          done
+
+      - name: Setup database schema
+        env:
+          PGHOST: localhost
+          PGPORT: 5432
+          PGUSER: realworld
+          PGPASSWORD: realworld
+          PGDATABASE: realworld
+        run: |
+          psql -f sql/schema.sql
+
+      - name: Create test config
+        run: |
+          cat > config.json << 'EOF'
+          {
+            "thread": {"dataThread": 2, "ioThread": 1, "timerThread": 1},
+            "server": {
+              "address": "0.0.0.0",
+              "port": 8002,
+              "secretKey": "test-secret-key-for-ci-only",
+              "publicMode": true,
+              "upAndDownPath": "./download/",
+              "staticFilePath": "./static/"
+            },
+            "postgres": {
+              "url": "postgres://realworld:realworld@localhost:5432/realworld",
+              "pool": 5,
+              "ttl": 5
+            }
+          }
+          EOF
+          mkdir -p download static
+
+      - name: Validate config
+        run: |
+          python3 -c "import json; json.load(open('config.json'))" || { echo "ERROR: config.json is invalid JSON"; exit 1; }
+
+      # Phase 1: Build
+      - name: Build
+        run: |
+          mkdir -p build && cd build
+          cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+          make -j$(nproc)
+
+      # Phase 2: Lint (clang-tidy, 경고 보고만 - CI 실패 아님)
+      - name: Run clang-tidy
+        continue-on-error: true
+        run: |
+          echo "=== clang-tidy 정적 분석 ==="
+          find src/ -name '*.hpp' -o -name '*.cpp' | head -20 | \
+            xargs clang-tidy -p build/ --quiet 2>&1 | tee clang-tidy-report.txt || true
+          WARNINGS=$(grep -c 'warning:' clang-tidy-report.txt || echo "0")
+          echo "clang-tidy 경고: ${WARNINGS}건"
+
+      # Phase 3: Unit + Integration Tests
+      - name: Run unit and integration tests
+        run: |
+          ./build/realworld-oatpp-test
+
+      # Phase 4: E2E Tests
+      - name: Run E2E scenario tests
+        env:
+          PGHOST: localhost
+          PGPORT: 5432
+          PGUSER: realworld
+          PGPASSWORD: realworld
+          PGDATABASE: realworld
+        run: |
+          # DB 초기화 (E2E용 클린 상태)
+          psql -f sql/schema.sql
+
+          # 서버 백그라운드 시작 (프로젝트 루트에서 실행 - config.json 위치)
+          ./build/realworld-oatpp &
+          SERVER_PID=$!
+
+          # 서버 준비 대기
+          for i in $(seq 1 30); do
+            if curl -s http://localhost:8002/api/tags > /dev/null 2>&1; then
+              echo "서버 준비 완료 (${i}초)"
+              break
+            fi
+            sleep 1
+          done
+
+          # E2E 실행
+          chmod +x test/e2e/run-e2e.sh
+          bash test/e2e/run-e2e.sh http://localhost:8002
+          E2E_EXIT=$?
+
+          # 서버 종료
+          kill $SERVER_PID 2>/dev/null || true
+          wait $SERVER_PID 2>/dev/null || true
+
+          exit $E2E_EXIT
+
+      # 결과 요약
+      - name: Upload clang-tidy report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: clang-tidy-report
+          path: clang-tidy-report.txt
+          if-no-files-found: ignore

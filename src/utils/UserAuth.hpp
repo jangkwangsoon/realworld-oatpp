@@ -43,21 +43,27 @@ public:
     }
     static UserAuth fromToken(String token){
         OATPP_COMPONENT(std::shared_ptr<Config>, m_config);
-        auto dec_obj = jwt::decode(
-            token->c_str(), 
-            algorithms({"HS256"}), 
-            secret(m_config->secretKey->c_str()));
-        Int64 exp=(Int64)dec_obj.payload().get_claim_value<uint64_t>("exp");
-        Int32 id=(Int32)dec_obj.payload().get_claim_value<uint64_t>("id");
-        String username=String(dec_obj.payload().get_claim_value<std::string>("username").c_str());
-        OATPP_LOGD("UserAuth","fromToken, user: %s",username->c_str());
-        auto e=std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-        if (exp < e) {
-            exp = (int64_t)0LL;
-            id = 0;
-            username = ""; 
-        };
-        return UserAuth {exp,id,username};
+        try {
+            auto dec_obj = jwt::decode(
+                token->c_str(),
+                algorithms({"HS256"}),
+                secret(m_config->secretKey->c_str()));
+            Int64 exp=(Int64)dec_obj.payload().get_claim_value<uint64_t>("exp");
+            Int32 id=(Int32)dec_obj.payload().get_claim_value<uint64_t>("id");
+            String username=String(dec_obj.payload().get_claim_value<std::string>("username").c_str());
+            OATPP_LOGD("UserAuth","fromToken, user: %s",username->c_str());
+            auto e=std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+            if (exp < e) {
+                exp = (int64_t)0LL;
+                id = 0;
+                username = "";
+            };
+            return UserAuth {exp,id,username};
+        } catch (const jwt::TokenExpiredError&) {
+            return UserAuth((int64_t)0LL, 0, "");
+        } catch (const std::exception&) {
+            return UserAuth((int64_t)0LL, 0, "");
+        }
     };
     static UserAuth fromAuthHeader(std::shared_ptr<IncomingRequest> request){
         auto authheader=request->getHeader("authorization");
