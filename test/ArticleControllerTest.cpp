@@ -119,6 +119,12 @@ void ArticleControllerTest::onRun() {
       auto response = client->updateArticle(authToken, articleSlug, uad);
       OATPP_ASSERT(response->getStatusCode() == 200);
 
+      // Update generates a new slug from the new title
+      auto body = response->readBodyToDto<oatpp::Object<ArticleResultDto>>(objectMapper.get());
+      if(body && body->article && body->article->slug) {
+        articleSlug = body->article->slug;
+      }
+
       OATPP_LOGD("ArticleControllerTest", "Update article: PASSED");
     }
 
