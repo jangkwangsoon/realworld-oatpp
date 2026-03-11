@@ -22,8 +22,9 @@ public:
   ~TestComponent() {
     /* Stop the async executor before destruction to avoid
        "terminate called without an active exception" */
-    (*executor)->stop();
-    (*executor)->join();
+    OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, exec);
+    exec->stop();
+    exec->join();
   }
 
   /**
