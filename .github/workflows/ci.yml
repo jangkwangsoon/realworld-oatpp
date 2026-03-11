@@ -68,9 +68,9 @@ jobs:
 
       - name: Create test config
         run: |
-          cat > config.json << 'CONF'
+          cat > config.json << 'EOF'
           {
-            "thread": { "dataThread": 2, "ioThread": 1, "timerThread": 1 },
+            "thread": {"dataThread": 2, "ioThread": 1, "timerThread": 1},
             "server": {
               "address": "0.0.0.0",
               "port": 8002,
@@ -80,12 +80,12 @@ jobs:
               "staticFilePath": "./static/"
             },
             "postgres": {
-              "url": "postgresql://realworld:realworld@localhost:5432/realworld",
+              "url": "postgres://realworld:realworld@localhost:5432/realworld",
               "pool": 5,
               "ttl": 5
             }
           }
-          CONF
+          EOF
           mkdir -p download static
 
       - name: Validate config
