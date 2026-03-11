@@ -22,8 +22,8 @@ public:
   ~TestComponent() {
     /* Stop the async executor before destruction to avoid
        "terminate called without an active exception" */
-    executor->stop();
-    executor->join();
+    (*executor)->stop();
+    (*executor)->join();
   }
 
   /**
