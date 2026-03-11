@@ -19,13 +19,6 @@
  */
 class TestComponent {
 public:
-  ~TestComponent() {
-    /* Stop the async executor before destruction to avoid
-       "terminate called without an active exception" */
-    OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, exec);
-    exec->stop();
-    exec->join();
-  }
 
   /**
    * Create Config component - required by DatabaseComponent, controllers, and UserAuth

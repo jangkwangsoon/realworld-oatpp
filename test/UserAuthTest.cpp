@@ -55,4 +55,8 @@ void UserAuthTest::onRun() {
   }
 
   OATPP_LOGD("UserAuthTest", "All tests PASSED");
+
+  OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, executor);
+  executor->stop();
+  executor->join();
 }
