@@ -126,10 +126,9 @@ jobs:
           # DB 초기화 (E2E용 클린 상태)
           psql -f sql/schema.sql
 
-          # 서버 백그라운드 시작
-          cd build && ./realworld-oatpp &
+          # 서버 백그라운드 시작 (프로젝트 루트에서 실행 - config.json 위치)
+          ./build/realworld-oatpp &
           SERVER_PID=$!
-          cd ..
 
           # 서버 준비 대기
           for i in $(seq 1 30); do
