@@ -112,8 +112,7 @@ jobs:
       # Phase 3: Unit + Integration Tests
       - name: Run unit and integration tests
         run: |
-          cd build
-          ./realworld-oatpp-test
+          ./build/realworld-oatpp-test
 
       # Phase 4: E2E Tests
       - name: Run E2E scenario tests
