@@ -19,6 +19,12 @@
  */
 class TestComponent {
 public:
+  ~TestComponent() {
+    /* Stop the async executor before destruction to avoid
+       "terminate called without an active exception" */
+    executor->stop();
+    executor->join();
+  }
 
   /**
    * Create Config component - required by DatabaseComponent, controllers, and UserAuth
