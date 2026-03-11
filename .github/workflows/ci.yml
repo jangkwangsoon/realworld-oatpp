@@ -50,7 +50,7 @@ jobs:
         run: |
           mkdir -p tmp && cd tmp
           for module in oatpp oatpp-zlib oatpp-postgresql; do
-            git clone --depth=1 --branch v1.3.0 https://github.com/oatpp/$module
+            git clone --depth=1 --branch 1.3.0 https://github.com/oatpp/$module
             cd $module && mkdir build && cd build
             cmake .. && make -j$(nproc) && sudo make install
             cd ../..
