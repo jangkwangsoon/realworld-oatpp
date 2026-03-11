@@ -18,8 +18,8 @@
 #include "oatpp/core/async/Executor.hpp"
 #include "oatpp/web/protocol/http/incoming/Request.hpp"
 
-#include "oatpp/web/mime/multipart/FileStreamProvider.hpp"
-#include "oatpp/web/mime/multipart/InMemoryPartReader.hpp"
+#include "oatpp/web/mime/multipart/FileProvider.hpp"
+#include "oatpp/web/mime/multipart/InMemoryDataProvider.hpp"
 #include "oatpp/web/mime/multipart/Reader.hpp"
 #include "oatpp/web/mime/multipart/PartList.hpp"
 
