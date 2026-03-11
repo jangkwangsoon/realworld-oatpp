@@ -43,7 +43,7 @@ jobs:
             /usr/local/lib/oatpp-*
             /usr/local/include/oatpp-*
             /usr/local/share/oatpp-*
-          key: oatpp-1.3.0-${{ runner.os }}-v2
+          key: oatpp-1.3.0-latest-${{ runner.os }}-v3
 
       - name: Build and install oatpp modules
         if: steps.oatpp-cache.outputs.cache-hit != 'true'
