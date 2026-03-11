@@ -133,7 +133,10 @@ void UserControllerTest::onRun() {
     {
       auto uud = UpdateUserDto::createShared();
       uud->user = UpdateUserDataDto::createShared();
+      uud->user->username = "testuser_uc";
+      uud->user->email = "testuser_uc@test.com";
       uud->user->bio = "Updated bio for test";
+      uud->user->image = "";
 
       auto response = client->updateUser(authToken, uud);
       OATPP_ASSERT(response->getStatusCode() == 200);
