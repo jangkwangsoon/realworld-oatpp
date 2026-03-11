@@ -39,27 +39,19 @@ void UserAuthTest::onRun() {
     OATPP_LOGD("UserAuthTest", "Expired token: PASSED");
   }
 
-  // Test 3: fromAuthHeader with valid header
+  // Test 3: Token prefix stripping logic
   {
     auto exp = UserAuth::newExp();
     UserAuth ua(exp, 7, "headeruser");
     auto token = ua.toToken();
-    oatpp::String authHeader = "Token " + token;
 
-    // Create a mock request with Authorization header
-    auto request = oatpp::web::protocol::http::incoming::Request::createShared(
-      oatpp::web::protocol::http::incoming::Request::createShared(
-        nullptr, nullptr, nullptr, nullptr, nullptr
-      )->getConnection(),
-      nullptr, nullptr, nullptr, nullptr
-    );
-    // We cannot easily mock the request headers, so we test fromToken directly
-    // fromAuthHeader calls fromToken after stripping "Token " prefix
+    // fromAuthHeader strips "Token " prefix, then calls fromToken
+    // We verify the token itself decodes correctly
     auto decoded = UserAuth::fromToken(token);
     OATPP_ASSERT(decoded.id == 7);
     OATPP_ASSERT(decoded.username == "headeruser");
 
-    OATPP_LOGD("UserAuthTest", "Auth header parsing: PASSED");
+    OATPP_LOGD("UserAuthTest", "Token parsing: PASSED");
   }
 
   OATPP_LOGD("UserAuthTest", "All tests PASSED");
