@@ -22,7 +22,7 @@ using namespace std;
 typedef oatpp::web::protocol::http::outgoing::Response OutgoingResponse;
 typedef oatpp::web::protocol::http::incoming::Request IncomingRequest;
 
-bool is_email_valid(const std::string& email){
+inline bool is_email_valid(const std::string& email){
    // define a regular expression
    const std::regex pattern
       ("(\\w+)(\\.|_)?(\\w*)@(\\w+)(\\.(\\w+))+");
@@ -31,7 +31,7 @@ bool is_email_valid(const std::string& email){
    return std::regex_match(email, pattern);
 }
 
-std::string getGmtTimeNow() {
+inline std::string getGmtTimeNow() {
   /**
    * Generate a UTC ISO8601-formatted timestamp
    * and return as std::string
@@ -53,7 +53,7 @@ std::string stringFormat( const std::string& format, Args ... args ){
     return std::string( buf.get(), buf.get() + size - 1 ); // We don't want the '\0' inside
 };
 
-oatpp::String mkErrMsg(oatpp::String e){
+inline oatpp::String mkErrMsg(oatpp::String e){
     std::string r="{\"errors\": {\"" + e
          +"\":[\"Error\"]}}";
     return oatpp::String(r.c_str());
@@ -62,7 +62,7 @@ oatpp::String mkErrMsg(oatpp::String e){
 #define OATPP_ASSERT_HTTP1(COND, STATUS, MESSAGE) \
 if(!(COND)) { status=STATUS;errmsg=MESSAGE;return nullptr; }
 
-std::shared_ptr<OutgoingResponse> allowCors(std::shared_ptr<OutgoingResponse> response){
+inline std::shared_ptr<OutgoingResponse> allowCors(std::shared_ptr<OutgoingResponse> response){
     response->putHeaderIfNotExists("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS, DELETE");
     response->putHeaderIfNotExists("Access-Control-Allow-Origin", "*");
     response->putHeaderIfNotExists("Access-Control-Max-Age", "1728000");
@@ -71,13 +71,13 @@ std::shared_ptr<OutgoingResponse> allowCors(std::shared_ptr<OutgoingResponse> re
     //         "Cache-Control, Content-Type, Range, Authorization");
     return response;
 };
-std::shared_ptr<OutgoingResponse> addType(std::shared_ptr<OutgoingResponse> response,
+inline std::shared_ptr<OutgoingResponse> addType(std::shared_ptr<OutgoingResponse> response,
     const char *fname){
     response->putHeaderIfNotExists("Content-Type",MimeTypes::getType(fname));
     return response;
 };
 
-oatpp::List<oatpp::String> split(oatpp::String src, oatpp::String dlt){
+inline oatpp::List<oatpp::String> split(oatpp::String src, oatpp::String dlt){
       auto rs=oatpp::List<oatpp::String>::createShared();
       std::string s = src;
       std::string delimiter = dlt;//"%%";
@@ -93,7 +93,7 @@ oatpp::List<oatpp::String> split(oatpp::String src, oatpp::String dlt){
       return rs;
 };
 
-string urlEncode(string str){
+inline string urlEncode(string str){
     string new_str;
     char c;
     int ic;
@@ -119,7 +119,7 @@ string urlEncode(string str){
     return new_str;
  }
 
-string urlDecode(string str){
+inline string urlDecode(string str){
     string ret;
     char ch;
     int i, ii, len = str.length();
@@ -140,7 +140,7 @@ string urlDecode(string str){
     return ret;
 }
 
-string randomString(int n){
+inline string randomString(int n){
     string seed="abcdefghijklmnopqrstuvwxyz"
         "ABCDEFGHJKLMNOPQRSTUVWXYZ"
         "1234567890";
